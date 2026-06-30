@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consolidated Critical Questions • Defaults and Overrides Split</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            ink: '#17202a',
+            muted: '#5f6b7a',
+            line: '#d9dee7',
+            canvas: '#f6f7f9',
+            panel: '#ffffff',
+            auto: '#047857',
+            manual: '#be123c',
+            hybrid: '#b45309',
+            unknown: '#64748b'
+          },
+          boxShadow: {
+            soft: '0 8px 24px rgba(15, 23, 42, 0.06)'
+          }
+        }
+      }
+    }
+  </script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    [x-cloak] { display: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+      html { scroll-behavior: auto; }
+    }
+    body {
+      font-feature-settings: "tnum" 1, "ss01" 1;
+    }
+    .surface {
+      background: #fff;
+      border: 1px solid #d9dee7;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+    .thin-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      font-size: 0.875rem;
+    }
+    .thin-table th {
+      color: #5f6b7a;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .thin-table th,
+    .thin-table td {
+      border-bottom: 1px solid #edf0f4;
+      padding: 0.75rem;
+      vertical-align: top;
+    }
+    .thin-table tbody tr:last-child td {
+      border-bottom: 0;
+    }
+    .tag {
+      align-items: center;
+      border-radius: 999px;
+      display: inline-flex;
+      font-size: 0.72rem;
+      font-weight: 700;
+      gap: 0.35rem;
+      line-height: 1;
+      padding: 0.36rem 0.62rem;
+      white-space: nowrap;
+    }
+    .tag-auto,
+    .tag-strong,
+    .tag-confirmed,
+    .tag-high {
+      background: #ecfdf5;
+      box-shadow: inset 0 0 0 1px #d1fae5;
+      color: #047857;
+    }
+    .tag-manual,
+    .tag-none,
+    .tag-no {
+      background: #fff1f2;
+      box-shadow: inset 0 0 0 1px #ffe4e6;
+      color: #be123c;
+    }
+    .tag-hybrid,
+    .tag-partial,
+    .tag-medium {
+      background: #fffbeb;
+      box-shadow: inset 0 0 0 1px #fde68a;
+      color: #b45309;
+    }
+    .tag-unknown {
+      background: #f1f5f9;
+      box-shadow: inset 0 0 0 1px #e2e8f0;
+      color: #64748b;
+    }
+    .tag-placement {
+      background: #ecfeff;
+      box-shadow: inset 0 0 0 1px #cffafe;
+      color: #0e7490;
+    }
+    .tag-passback {
+      background: #eff6ff;
+      box-shadow: inset 0 0 0 1px #dbeafe;
+      color: #1d4ed8;
+    }
+    .dot-auto { background: #047857; }
+    .dot-manual { background: #be123c; }
+    .dot-hybrid { background: #b45309; }
+    .dot-unknown { background: #64748b; }
+    .axis-track {
+      background:
+        linear-gradient(90deg, #fb7185 0%, #f59e0b 48%, #10b981 100%);
+      border-radius: 999px;
+      height: 8px;
+      opacity: 0.9;
+      position: relative;
+    }
+    .axis-track::before {
+      background: #fff;
+      border-radius: 999px;
+      content: "";
+      inset: 2px;
+      position: absolute;
+    }
+    .axis-dot {
+      border: 2px solid #fff;
+      border-radius: 999px;
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.2), 0 2px 6px rgba(15, 23, 42, 0.18);
+      height: 15px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 15px;
+      z-index: 2;
+    }
+    .row-action {
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+    }
+    .row-action:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+    .section-anchor {
+      scroll-margin-top: 86px;
+    }
+  </style>
+</head>
+<body class="bg-canvas text-ink antialiased">
+  <div x-data="app()" x-cloak class="min-h-screen">
+    <header class="sticky top-0 z-50 border-b border-line bg-white/95 backdrop-blur">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3">
+        <a href="#top" class="flex min-w-0 items-center gap-3">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink text-white">
+            <i data-lucide="sliders-horizontal" class="h-4 w-4"></i>
+          </span>
+          <span class="min-w-0">
+            <span class="block truncate text-sm font-semibold tracking-tight sm:hidden">Question Split</span>
+            <span class="hidden truncate text-base font-semibold tracking-tight sm:block">Critical Questions Split</span>
+            <span class="hidden truncate text-xs text-muted sm:block">Content structure, assignment defaults, and assessment overrides</span>
+          </span>
+        </a>
+        <div class="flex items-center gap-2">
+          <a href="#q1" class="hidden rounded-md border border-line bg-white px-3 py-1.5 text-xs font-semibold text-muted hover:text-ink md:inline-flex">Questions</a>
+          <button @click="openCompare()" class="inline-flex items-center gap-2 rounded-md bg-ink px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 sm:px-3" aria-label="Compare selected providers">
+            <i data-lucide="columns-3" class="h-3.5 w-3.5"></i>
+            <span class="hidden sm:inline">Compare</span>
+            <span x-text="selectedProviders.length"></span>
+          </button>
+          <button @click="resetAll()" class="inline-flex items-center gap-2 rounded-md border border-line bg-white px-3 py-1.5 text-xs font-semibold text-muted hover:text-ink">
+            <i data-lucide="rotate-ccw" class="h-3.5 w-3.5"></i>
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="top" class="mx-auto max-w-7xl px-5 pb-14">
+      <section class="grid gap-6 pb-6 pt-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div>
+          <div class="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-muted">Research synthesis</div>
+          <h1 class="max-w-4xl text-3xl font-semibold tracking-tight text-ink md:text-5xl">Three critical questions, with defaults and overrides made explicit</h1>
+          <p class="mt-4 max-w-3xl text-base leading-7 text-muted">
+            This consolidated version keeps the three-question spine: content structure, learning-object assignment, and grade-bearing assessment workflow. The recurring theme is what happens automatically, what remains teacher-directed, and what must be independently controllable.
+          </p>
+        </div>
+
+        <div class="surface p-4">
+          <div class="mb-3 flex items-center gap-2 text-sm font-semibold">
+            <i data-lucide="target" class="h-4 w-4 text-auto"></i>
+            <span>Critical theme</span>
+          </div>
+          <div class="space-y-3 text-sm leading-6 text-muted">
+            <p><span class="font-semibold text-ink">Structure matters only if it maps to control.</span> Unit, module, lesson, and activity labels should make assignment defaults obvious.</p>
+            <p><span class="font-semibold text-ink">Lesson flow and assessment flow need different defaults.</span> A daily lesson can be auto-sequenced while a grade-bearing assessment still needs deliberate release and scoring rules.</p>
+            <p><span class="font-semibold text-ink">Override clarity is the product gap.</span> Teachers need to know what can be reassigned, scored manually, hidden, retaken, or passed back.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-6 grid gap-3 md:grid-cols-3">
+        <a href="#q1" class="surface p-4 row-action">
+          <div class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Question 1</div>
+          <h2 class="mt-2 text-lg font-semibold tracking-tight">Content structure</h2>
+          <p class="mt-3 text-sm leading-6 text-muted">How does each provider organize the assignable curriculum spine: program, grade, mission, unit, module, lesson, session, activity, or assessment?</p>
+        </a>
+        <a href="#q2" class="surface p-4 row-action">
+          <div class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Question 2</div>
+          <h2 class="mt-2 text-lg font-semibold tracking-tight">Learning-object assignment</h2>
+          <p class="mt-3 text-sm leading-6 text-muted">What is released by default, what auto-sequences, and where can teachers manually override placement or assign specific work?</p>
+        </a>
+        <a href="#q3" class="surface p-4 row-action">
+          <div class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Question 3</div>
+          <h2 class="mt-2 text-lg font-semibold tracking-tight">Grade-bearing workflow</h2>
+          <p class="mt-3 text-sm leading-6 text-muted">Which checks and assessments are embedded, separate, auto-scored, manually reviewed, retakable, or eligible for passback?</p>
+        </a>
+      </section>
+
+      <section class="mb-6 grid gap-3 md:grid-cols-3">
+        <div class="surface p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Manual lesson default</div>
+              <div class="mt-1 text-2xl font-semibold" x-text="countByLessonMode('manual')"></div>
+            </div>
+            <span class="tag bg-rose-50 text-manual">Teacher release</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-muted">Savvas, McGraw Hill, Eureka Math2, STEMscopes, ORIGO, CPM, and Bridges are most clearly teacher-orchestrated.</p>
+        </div>
+        <div class="surface p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Auto-sequence default</div>
+              <div class="mt-1 text-2xl font-semibold" x-text="countByLessonMode('auto')"></div>
+            </div>
+            <span class="tag bg-emerald-50 text-auto">After placement</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-muted">Zearn is the cleanest public example of auto-advance after placement.</p>
+        </div>
+        <div class="surface p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Hybrid or unclear</div>
+              <div class="mt-1 text-2xl font-semibold" x-text="countByLessonMode('hybrid') + countByLessonMode('unknown')"></div>
+            </div>
+            <span class="tag bg-amber-50 text-hybrid">Core + layers</span>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-muted">Several blended or partner-led providers confirm digital supports, but not all public workflow settings.</p>
+        </div>
+      </section>
+
+      <section class="surface mb-9 p-4">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="mr-1 text-xs font-bold uppercase tracking-[0.14em] text-muted">Filter by lesson default</span>
+            <template x-for="mode in modeFilters" :key="mode.id">
+              <button @click="setModeFilter(mode.id)" class="rounded-md border px-3 py-1.5 text-sm font-semibold transition"
+                :class="modeFilter === mode.id ? 'border-ink bg-ink text-white' : 'border-line bg-white text-muted hover:text-ink'">
+                <span x-text="mode.label"></span>
+              </button>
+            </template>
+          </div>
+          <label class="relative block w-full lg:w-80">
+            <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"></i>
+            <input x-model="searchTerm" @input="applyFilters()" type="search" placeholder="Search provider, product, or workflow" class="w-full rounded-md border border-line bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-ink">
+          </label>
+        </div>
+      </section>
+
+      <section id="q1" class="section-anchor mb-10">
+        <div class="mb-4 max-w-3xl">
+          <div class="text-xs font-bold uppercase tracking-[0.16em] text-muted">Question 1</div>
+          <h2 class="mt-1 text-2xl font-semibold tracking-tight">How do core curricula structure content for assignment?</h2>
+          <p class="mt-2 text-sm leading-6 text-muted">
+            The useful distinction is not just vocabulary. It is whether the hierarchy exposes clear assignable objects. The consolidated matrix adds scope-, module-, assessment-folder-, eBook-, and partner-assessment models alongside item/container and sequence-placement workflows.
+          </p>
+        </div>
+
+        <div class="surface overflow-x-auto">
+          <table class="thin-table min-w-[980px]">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="text-left">Provider</th>
+                <th class="text-left">Primary hierarchy</th>
+                <th class="text-left">Assignable vocabulary</th>
+                <th class="text-left">Evidence note</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="p in filteredProviders" :key="p.id">
+                <tr>
+                  <td>
+                    <button @click="showProviderDetail(p.id)" class="text-left font-semibold hover:underline" x-text="p.provider"></button>
+                    <div class="text-xs text-muted" x-text="p.product"></div>
+                  </td>
+                  <td class="max-w-md text-sm text-muted" x-text="p.hierarchy"></td>
+                  <td>
+                    <div class="flex flex-wrap gap-2">
+                      <template x-for="term in p.terms" :key="term">
+                        <span class="tag bg-slate-100 text-slate-700" x-text="term"></span>
+                      </template>
+                    </div>
+                  </td>
+                  <td class="text-sm text-muted" x-text="p.defaults.evidenceGap"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="q2" class="section-anchor mb-10">
+        <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div class="max-w-3xl">
+            <div class="text-xs font-bold uppercase tracking-[0.16em] text-muted">Question 2</div>
+            <h2 class="mt-1 text-2xl font-semibold tracking-tight">How are learning objects assigned?</h2>
+            <p class="mt-2 text-sm leading-6 text-muted">
+              This is where the defaults theme becomes most visible. Most products separate enrollment from instruction: Zearn auto-advances after placement, several core products stay teacher-release oriented, and blended or partner-led providers sit between those poles.
+            </p>
+          </div>
+          <div class="flex items-center gap-3 text-xs text-muted">
+            <span>Manual</span>
+            <span class="h-2 w-24 rounded-full bg-gradient-to-r from-rose-400 via-amber-400 to-emerald-500"></span>
+            <span>Automatic</span>
+          </div>
+        </div>
+
+        <div class="surface overflow-hidden">
+          <div class="hidden border-b border-line bg-slate-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-muted md:grid md:grid-cols-[220px_minmax(180px,1fr)_minmax(170px,0.75fr)_260px] md:gap-5">
+            <div>Provider</div>
+            <div>Default learning-object flow</div>
+            <div>Assignable levels</div>
+            <div>Override and student navigation</div>
+          </div>
+
+          <template x-for="p in filteredProviders" :key="p.id">
+            <div class="row-action grid gap-4 border-b border-line px-4 py-4 last:border-b-0 md:grid-cols-[220px_minmax(180px,1fr)_minmax(170px,0.75fr)_260px] md:items-center md:gap-5">
+              <div class="flex min-w-0 items-start gap-3">
+                <input type="checkbox" class="mt-1 h-4 w-4 rounded border-line text-ink" :checked="selectedProviders.includes(p.id)" @change="toggleProvider(p.id)" :aria-label="'Select ' + p.provider">
+                <button @click="showProviderDetail(p.id)" class="min-w-0 text-left">
+                  <div class="truncate font-semibold" x-text="p.provider"></div>
+                  <div class="truncate text-sm text-muted" x-text="p.product"></div>
+                  <div class="mt-2"><span class="tag" :class="confidenceClass(p.confidence)" x-text="p.confidence + ' evidence'"></span></div>
+                </button>
+              </div>
+
+              <button @click="showProviderDetail(p.id)" class="text-left">
+                <div class="mb-2 flex items-center justify-between gap-2">
+                  <span class="tag" :class="modeClass(p.defaults.lessonMode)" x-text="p.defaults.lessonLabel"></span>
+                  <span class="text-xs text-muted" x-text="p.defaults.lessonShort"></span>
+                </div>
+                <div class="axis-track" aria-hidden="true">
+                  <span class="axis-dot" :class="dotClass(p.defaults.lessonMode)" :style="positionStyle(p.defaults.lessonPosition)"></span>
+                </div>
+                <p class="mt-2 text-xs leading-5 text-muted" x-text="p.defaults.lessonDetail"></p>
+              </button>
+
+              <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                <div><div class="mb-1 text-muted">Unit</div><span class="tag" :class="supportClass(p.q2.unitModule)" x-text="supportText(p.q2.unitModule)"></span></div>
+                <div><div class="mb-1 text-muted">Lesson</div><span class="tag" :class="supportClass(p.q2.lesson)" x-text="supportText(p.q2.lesson)"></span></div>
+                <div><div class="mb-1 text-muted">Practice</div><span class="tag" :class="supportClass(p.q2.skillPractice)" x-text="supportText(p.q2.skillPractice)"></span></div>
+                <div><div class="mb-1 text-muted">Sequence</div><span class="tag" :class="supportClass(p.q2.autoSequence)" x-text="supportText(p.q2.autoSequence)"></span></div>
+              </div>
+
+              <button @click="showProviderDetail(p.id)" class="text-left">
+                <div class="mb-2 flex flex-wrap gap-2">
+                  <span class="tag" :class="overrideClass(p.defaults.overrideMode)" x-text="p.defaults.overrideLabel"></span>
+                  <span class="tag" :class="supportClass(p.q2.scheduleLock)" x-text="'Schedule/lock: ' + supportText(p.q2.scheduleLock)"></span>
+                </div>
+                <p class="text-xs leading-5 text-muted" x-text="p.q2.selfNav"></p>
+                <p class="mt-1 text-xs leading-5 text-muted" x-text="p.defaults.overrideDetail"></p>
+              </button>
+            </div>
+          </template>
+        </div>
+      </section>
+
+      <section id="q3" class="section-anchor mb-10">
+        <div class="mb-4 max-w-3xl">
+          <div class="text-xs font-bold uppercase tracking-[0.16em] text-muted">Question 3</div>
+          <h2 class="mt-1 text-2xl font-semibold tracking-tight">How are grade-bearing assessments assigned, scored, and passed back?</h2>
+          <p class="mt-2 text-sm leading-6 text-muted">
+            The assessment story is separate from the lesson story. Some checks are embedded and auto-calculated, but grade-bearing work often needs teacher release, manual scoring, rubric review, retake policy, and object-aware passback.
+          </p>
+        </div>
+
+        <div class="surface overflow-x-auto">
+          <table class="thin-table min-w-[1120px]">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="text-left">Provider</th>
+                <th class="text-left">Assessment default</th>
+                <th>Embedded</th>
+                <th>Separate</th>
+                <th>Auto calc</th>
+                <th>Manual override</th>
+                <th>Passback</th>
+                <th>Retakes</th>
+                <th class="text-left">Scoring model</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="p in filteredProviders" :key="p.id">
+                <tr>
+                  <td>
+                    <button @click="showProviderDetail(p.id)" class="text-left font-semibold hover:underline" x-text="p.provider"></button>
+                    <div class="text-xs text-muted" x-text="p.product"></div>
+                  </td>
+                  <td>
+                    <span class="tag" :class="modeClass(p.defaults.assessmentMode)" x-text="p.defaults.assessmentLabel"></span>
+                    <div class="mt-2 text-sm text-muted" x-text="p.q3.assessAssign"></div>
+                    <div class="mt-2 text-xs leading-5 text-muted" x-text="p.defaults.assessmentDetail"></div>
+                  </td>
+                  <td class="text-center"><span class="tag" :class="supportClass(p.q3.embedded)" x-text="supportText(p.q3.embedded)"></span></td>
+                  <td class="text-center"><span class="tag" :class="supportClass(p.q3.separate)" x-text="supportText(p.q3.separate)"></span></td>
+                  <td class="text-center"><span class="tag" :class="supportClass(p.q3.autoCalc)" x-text="supportText(p.q3.autoCalc)"></span></td>
+                  <td class="text-center"><span class="tag" :class="supportClass(p.q3.override)" x-text="supportText(p.q3.override)"></span></td>
+                  <td class="text-center"><span class="tag" :class="supportClass(p.q3.passback)" x-text="supportText(p.q3.passback)"></span></td>
+                  <td class="text-center"><span class="tag" :class="supportClass(p.q3.retakes)" x-text="supportText(p.q3.retakes)"></span></td>
+                  <td class="text-sm text-muted" x-text="p.q3.gradingModels.join(', ')"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="grid gap-4 lg:grid-cols-[1fr_1fr]">
+        <div class="surface p-5">
+          <div class="mb-3 flex items-center gap-2 font-semibold">
+            <i data-lucide="split" class="h-4 w-4 text-hybrid"></i>
+            <span>Does the split help?</span>
+          </div>
+          <p class="text-sm leading-6 text-muted">
+            Yes, directionally: Q1 explains the objects, Q2 explains default release and override behavior, and Q3 isolates grade-bearing rules. That prevents assessment passback and retake ambiguity from being buried inside the lesson-assignment story.
+          </p>
+        </div>
+        <div class="surface p-5">
+          <div class="mb-3 flex items-center gap-2 font-semibold">
+            <i data-lucide="file-warning" class="h-4 w-4 text-manual"></i>
+            <span>Remaining caveat</span>
+          </div>
+          <p class="text-sm leading-6 text-muted">
+            Public evidence is still uneven. Savvas, Zearn, STEMscopes, and ORIGO have the clearest workflow pieces; several blended or partner-led providers confirm assessments or reports without fully specifying assignment bundling, scoring overrides, retakes, or object-level passback.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <div x-show="detailProvider" x-transition.opacity class="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/55 p-0 md:items-center md:p-5" @click.self="closeDetail()">
+      <div x-show="detailProvider" x-transition class="max-h-[92vh] w-full max-w-3xl overflow-auto rounded-t-lg border border-line bg-white p-5 shadow-soft md:rounded-lg md:p-6">
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <div class="text-xl font-semibold tracking-tight">
+              <span x-text="detailProvider ? detailProvider.provider : ''"></span>
+              <span class="text-muted"> / </span>
+              <span class="text-base text-muted" x-text="detailProvider ? detailProvider.product : ''"></span>
+            </div>
+            <div class="mt-1 text-sm text-muted" x-text="detailProvider ? detailProvider.model : ''"></div>
+          </div>
+          <button @click="closeDetail()" class="rounded-md border border-line p-2 text-muted hover:text-ink" aria-label="Close provider details">
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+
+        <div x-show="detailProvider" class="mt-5 grid gap-4">
+          <div class="grid gap-3 md:grid-cols-3">
+            <div class="rounded-lg border border-line p-3">
+              <div class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Lesson default</div>
+              <div class="mt-2"><span class="tag" :class="detailProvider ? modeClass(detailProvider.defaults.lessonMode) : ''" x-text="detailProvider ? detailProvider.defaults.lessonLabel : ''"></span></div>
+              <p class="mt-2 text-sm leading-6 text-muted" x-text="detailProvider ? detailProvider.defaults.lessonDetail : ''"></p>
+            </div>
+            <div class="rounded-lg border border-line p-3">
+              <div class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Assessment default</div>
+              <div class="mt-2"><span class="tag" :class="detailProvider ? modeClass(detailProvider.defaults.assessmentMode) : ''" x-text="detailProvider ? detailProvider.defaults.assessmentLabel : ''"></span></div>
+              <p class="mt-2 text-sm leading-6 text-muted" x-text="detailProvider ? detailProvider.defaults.assessmentDetail : ''"></p>
+            </div>
+            <div class="rounded-lg border border-line p-3">
+              <div class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Override</div>
+              <div class="mt-2"><span class="tag" :class="detailProvider ? overrideClass(detailProvider.defaults.overrideMode) : ''" x-text="detailProvider ? detailProvider.defaults.overrideLabel : ''"></span></div>
+              <p class="mt-2 text-sm leading-6 text-muted" x-text="detailProvider ? detailProvider.defaults.overrideDetail : ''"></p>
+            </div>
+          </div>
+
+          <div>
+            <div class="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted">Content structure</div>
+            <div class="rounded-lg border border-line p-3 text-sm text-muted" x-text="detailProvider ? detailProvider.hierarchy : ''"></div>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <template x-for="term in (detailProvider ? detailProvider.terms : [])" :key="term">
+                <span class="tag bg-slate-100 text-slate-700" x-text="term"></span>
+              </template>
+            </div>
+          </div>
+
+          <div>
+            <div class="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted">Evidence notes</div>
+            <p class="rounded-lg border border-line bg-slate-50 p-3 text-sm leading-6 text-muted" x-text="detailProvider ? detailProvider.notes : ''"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div x-show="showCompare" x-transition.opacity class="fixed inset-0 z-[80] flex items-end justify-center bg-slate-950/60 p-0 md:items-center md:p-5" @click.self="showCompare = false">
+      <div x-show="showCompare" x-transition class="max-h-[92vh] w-full max-w-5xl overflow-auto rounded-t-lg border border-line bg-white p-5 shadow-soft md:rounded-lg md:p-6">
+        <div class="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <div class="text-xl font-semibold tracking-tight">Selected provider comparison</div>
+            <div class="mt-1 text-sm text-muted">Focused on defaults, overrides, scoring, and passback.</div>
+          </div>
+          <button @click="showCompare = false" class="rounded-md border border-line p-2 text-muted hover:text-ink" aria-label="Close compare">
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="thin-table min-w-[900px]">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="text-left">Provider</th>
+                <th class="text-left">Learning default</th>
+                <th class="text-left">Teacher override</th>
+                <th class="text-left">Assessment default</th>
+                <th class="text-left">Passback</th>
+                <th class="text-left">Evidence gap</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="pid in selectedProviders" :key="pid">
+                <tr>
+                  <td>
+                    <div class="font-semibold" x-text="getProvider(pid).provider"></div>
+                    <div class="text-xs text-muted" x-text="getProvider(pid).product"></div>
+                  </td>
+                  <td>
+                    <span class="tag" :class="modeClass(getProvider(pid).defaults.lessonMode)" x-text="getProvider(pid).defaults.lessonLabel"></span>
+                    <div class="mt-2 text-sm text-muted" x-text="getProvider(pid).defaults.lessonDetail"></div>
+                  </td>
+                  <td>
+                    <span class="tag" :class="overrideClass(getProvider(pid).defaults.overrideMode)" x-text="getProvider(pid).defaults.overrideLabel"></span>
+                    <div class="mt-2 text-sm text-muted" x-text="getProvider(pid).defaults.overrideDetail"></div>
+                  </td>
+                  <td>
+                    <span class="tag" :class="modeClass(getProvider(pid).defaults.assessmentMode)" x-text="getProvider(pid).defaults.assessmentLabel"></span>
+                    <div class="mt-2 text-sm text-muted" x-text="getProvider(pid).defaults.assessmentDetail"></div>
+                  </td>
+                  <td><span class="tag" :class="passbackClass(getProvider(pid).defaults.passbackMode)" x-text="getProvider(pid).defaults.passbackLabel"></span></td>
+                  <td class="text-sm text-muted" x-text="getProvider(pid).defaults.evidenceGap"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function app() {
+      return {
+        allProviders: [],
+        filteredProviders: [],
+        selectedProviders: [],
+        detailProvider: null,
+        showCompare: false,
+        searchTerm: '',
+        modeFilter: 'all',
+        modeFilters: [
+          { id: 'all', label: 'All' },
+          { id: 'manual', label: 'Manual' },
+          { id: 'auto', label: 'Auto' },
+          { id: 'hybrid', label: 'Hybrid' },
+          { id: 'unknown', label: 'Unknown' }
+        ],
+
+        init() {
+          this.loadProviders()
+          this.selectedProviders = ['savvas', 'zearn', 'mcgraw']
+          this.applyFilters()
+          this.$nextTick(() => {
+            if (window.lucide) lucide.createIcons()
+          })
+        },
+
+        loadProviders() {
+          this.allProviders = [
+          {
+                    "id": "savvas",
+                    "provider": "Savvas",
+                    "product": "enVision / Investigations via Realize",
+                    "model": "Publisher-platform core",
+                    "confidence": "High",
+                    "hierarchy": "Program / purchased content > drill-down content items > activities, playlists, tests, assessments, and standards-linked resources",
+                    "terms": [
+                              "Program",
+                              "Content item",
+                              "Activity",
+                              "Playlist",
+                              "Test",
+                              "Assessment",
+                              "Standards resource"
+                    ],
+                    "defaults": {
+                              "lessonMode": "manual",
+                              "lessonLabel": "Manual release",
+                              "lessonShort": "teacher-led",
+                              "lessonPosition": 12,
+                              "lessonDetail": "Teachers assign individual items, all assignable items in a container, multiple separate items, combined assignments, playlists, remediation, or enrichment.",
+                              "assessmentMode": "manual",
+                              "assessmentLabel": "Assignable tests",
+                              "assessmentShort": "mixed scoring",
+                              "assessmentPosition": 16,
+                              "assessmentDetail": "Tests and assignments can be grade-bearing objects; scoring can be auto, manual, rubric, or mixed depending on item type.",
+                              "overrideMode": "strong",
+                              "overrideLabel": "Strong override",
+                              "overrideDetail": "Controls include recipients, dates, times, visibility, grouping, combined/separate assignments, score review, and manual scoring.",
+                              "passbackMode": "partial",
+                              "passbackLabel": "Passback documented",
+                              "evidenceGap": "Highest operational confidence; exact enVision or Investigations object labels vary by purchased program."
+                    },
+                    "q2": {
+                              "wholeCourse": "~",
+                              "unitModule": true,
+                              "lesson": true,
+                              "skillPractice": true,
+                              "autoSequence": false,
+                              "scheduleLock": true,
+                              "selfNav": "Students see assigned work; hidden or scheduled assignments can be kept off student lists."
+                    },
+                    "q3": {
+                              "embedded": "~",
+                              "separate": true,
+                              "autoCalc": true,
+                              "override": true,
+                              "passback": "~",
+                              "retakes": "~",
+                              "assessAssign": "Teachers assign tests, assessments, built tests, PDFs, Google Docs, and other program objects.",
+                              "gradingModels": [
+                                        "auto-scored",
+                                        "manual review",
+                                        "rubric",
+                                        "mixed grouped assignments"
+                              ]
+                    },
+                    "notes": "Savvas Realize is the clearest example of a mature assignment object plus scoring object plus passback object workflow. Teachers can assign to classes, groups, or individuals with dates and access windows. Some tests auto-score; PDFs, Google Docs, Realize Reader selections, manual assessments, open-ended items, and mixed assignments require teacher review. Google Classroom grade passback is documented."
+          },
+          {
+                    "id": "zearn",
+                    "provider": "Zearn",
+                    "product": "Zearn Math",
+                    "model": "Sequence-first core",
+                    "confidence": "High",
+                    "hierarchy": "Grade > Mission > Topic > Lesson > Independent Digital Lesson components > Tower of Power / Exit Ticket",
+                    "terms": [
+                              "Grade",
+                              "Mission",
+                              "Topic",
+                              "Lesson",
+                              "Tower of Power",
+                              "Exit Ticket",
+                              "Math Library"
+                    ],
+                    "defaults": {
+                              "lessonMode": "auto",
+                              "lessonLabel": "Auto-sequence",
+                              "lessonShort": "after placement",
+                              "lessonPosition": 90,
+                              "lessonDetail": "Students start at a grade/Mission/Topic/lesson placement and automatically advance through the digital sequence after completion.",
+                              "assessmentMode": "embedded",
+                              "assessmentLabel": "Embedded mastery",
+                              "assessmentShort": "not gradebook-first",
+                              "assessmentPosition": 84,
+                              "assessmentDetail": "Tower of Power is automatically administered and mastery-gated; Exit Tickets and Mission assessments remain teacher or school grading-policy artifacts.",
+                              "overrideMode": "placement",
+                              "overrideLabel": "Placement override",
+                              "overrideDetail": "Teachers change grade, Mission, Topic, or lesson placement rather than manually assigning every next digital lesson.",
+                              "passbackMode": "none",
+                              "passbackLabel": "No passback evidence",
+                              "evidenceGap": "Very clear for auto-advance and placement override; conventional gradebook behavior is intentionally not the core model."
+                    },
+                    "q2": {
+                              "wholeCourse": "~",
+                              "unitModule": true,
+                              "lesson": true,
+                              "skillPractice": true,
+                              "autoSequence": true,
+                              "scheduleLock": true,
+                              "selfNav": "Student Feed shows Next Up; students cannot access the next digital activity until completing the current one. Teachers can bookmark Math Library lessons."
+                    },
+                    "q3": {
+                              "embedded": true,
+                              "separate": true,
+                              "autoCalc": true,
+                              "override": "~",
+                              "passback": false,
+                              "retakes": "~",
+                              "assessAssign": "Tower of Power is embedded in each digital lesson; paper Exit Tickets and Mission assessments are handled locally.",
+                              "gradingModels": [
+                                        "mastery-gated",
+                                        "completion evidence",
+                                        "local grading policy"
+                              ]
+                    },
+                    "notes": "Zearn is the strongest sequence-first example. Students are automatically assigned into the first lesson of their grade and progress after completing the current digital lesson. School Accounts can change placement down to the lesson. Reports do not display conventional grades because Tower of Power requires successful completion."
+          },
+          {
+                    "id": "iready",
+                    "provider": "Curriculum Associates",
+                    "product": "i-Ready Classroom Mathematics",
+                    "model": "Core + digital layers",
+                    "confidence": "Medium",
+                    "hierarchy": "Units > lessons > sessions; lessons follow Explore, Develop, Refine sessions; Interactive Practice and digital assessments are assignable",
+                    "terms": [
+                              "Unit",
+                              "Lesson",
+                              "Session",
+                              "Interactive Practice",
+                              "Digital assessment",
+                              "Report"
+                    ],
+                    "defaults": {
+                              "lessonMode": "hybrid",
+                              "lessonLabel": "Hybrid layer",
+                              "lessonShort": "core + digital",
+                              "lessonPosition": 52,
+                              "lessonDetail": "Public pages confirm teacher-assigned Interactive Practice and digital assessments, but exact unit, lesson, and session release controls are not public.",
+                              "assessmentMode": "manual",
+                              "assessmentLabel": "Assigned assessment",
+                              "assessmentShort": "details limited",
+                              "assessmentPosition": 36,
+                              "assessmentDetail": "Assignable assessments and reports are confirmed; auto/manual scoring, grade-bearing default, retakes, and passback are not public.",
+                              "overrideMode": "partial",
+                              "overrideLabel": "Partial evidence",
+                              "overrideDetail": "Teacher assignment is evident for practice and assessments, but object-level overrides are not publicly detailed.",
+                              "passbackMode": "unknown",
+                              "passbackLabel": "Passback unknown",
+                              "evidenceGap": "Operational support is largely behind login; exact assignment and scoring controls are not publicly verifiable."
+                    },
+                    "q2": {
+                              "wholeCourse": "~",
+                              "unitModule": "~",
+                              "lesson": "~",
+                              "skillPractice": true,
+                              "autoSequence": "~",
+                              "scheduleLock": "~",
+                              "selfNav": "Student Digital Experience includes worktext, Diagnostic, tools, games, Interactive Practice, and assessments; queue vs map is not fully public."
+                    },
+                    "q3": {
+                              "embedded": "~",
+                              "separate": true,
+                              "autoCalc": "?",
+                              "override": "?",
+                              "passback": "?",
+                              "retakes": "?",
+                              "assessAssign": "Teacher-assigned digital assessments are public; scoring model, bundling, retakes, and passback are unclear.",
+                              "gradingModels": [
+                                        "unknown public detail"
+                              ]
+                    },
+                    "notes": "i-Ready Classroom Mathematics is a K-Algebra 1 core program with units, lessons, sessions, Interactive Practice, assignable assessments, and reports. The consolidated report treats it as a core curriculum with assignable digital practice and assessments, but not as a fully documented assignment shell from public evidence alone."
+          },
+          {
+                    "id": "hmh",
+                    "provider": "HMH",
+                    "product": "Into Math / Into AGA / Go Math",
+                    "model": "Teacher-led core + adaptive overlays",
+                    "confidence": "Medium",
+                    "hierarchy": "Core lesson sequence on HMH Ed; Into AGA references units/modules and practice by skill, lesson, or standard; Waggle/Personalized Path adds adaptive practice",
+                    "terms": [
+                              "Unit",
+                              "Module",
+                              "Lesson",
+                              "Skill practice",
+                              "Formative check",
+                              "Program assessment",
+                              "Waggle"
+                    ],
+                    "defaults": {
+                              "lessonMode": "hybrid",
+                              "lessonLabel": "Hybrid overlay",
+                              "lessonShort": "core + adaptive",
+                              "lessonPosition": 58,
+                              "lessonDetail": "Grade-level core appears teacher-led while Waggle, Personalized Path, and MAP-linked supports route additional practice.",
+                              "assessmentMode": "hybrid",
+                              "assessmentLabel": "Embedded + separate",
+                              "assessmentShort": "details limited",
+                              "assessmentPosition": 58,
+                              "assessmentDetail": "Formative checks, program assessments, MAP Growth integration, data, and recommendations are confirmed; grading settings are not public.",
+                              "overrideMode": "partial",
+                              "overrideLabel": "Partial evidence",
+                              "overrideDetail": "Differentiation and targeted assignment are public, but exact release, locking, scoring, and retake controls are not.",
+                              "passbackMode": "unknown",
+                              "passbackLabel": "Passback unknown",
+                              "evidenceGap": "Public pages are stronger for the adaptive overlay than for the exact core assignment workflow."
+                    },
+                    "q2": {
+                              "wholeCourse": "~",
+                              "unitModule": true,
+                              "lesson": true,
+                              "skillPractice": true,
+                              "autoSequence": "~",
+                              "scheduleLock": "~",
+                              "selfNav": "Students monitor growth on HMH Ed and receive targeted practice; exact course map vs assigned list is not public."
+                    },
+                    "q3": {
+                              "embedded": true,
+                              "separate": "~",
+                              "autoCalc": "?",
+                              "override": "?",
+                              "passback": "?",
+                              "retakes": "?",
+                              "assessAssign": "Formative checks and program assessments are referenced, but exact assessment assignment settings are unclear.",
+                              "gradingModels": [
+                                        "unknown public detail"
+                              ]
+                    },
+                    "notes": "HMH is best characterized as teacher-led core instruction with adaptive support layers. Public evidence confirms HMH Ed, MAP Growth integration, formative checks, program assessments, growth monitoring, and Waggle practice, but not exact assignment granularity or item-level scoring behavior."
+          },
+          {
+                    "id": "mcgraw",
+                    "provider": "McGraw Hill",
+                    "product": "Reveal Math / Everyday Mathematics",
+                    "model": "Publisher-platform core with strong integrations",
+                    "confidence": "Medium",
+                    "hierarchy": "Reveal references course-, module-, and lesson-level assessments plus three-part lessons; Everyday workflow is less public",
+                    "terms": [
+                              "Course",
+                              "Module",
+                              "Lesson",
+                              "Digital Assignment",
+                              "Assessment",
+                              "Assignment Sync",
+                              "Grade Passback"
+                    ],
+                    "defaults": {
+                              "lessonMode": "manual",
+                              "lessonLabel": "Manual release",
+                              "lessonShort": "platform + LMS",
+                              "lessonPosition": 22,
+                              "lessonDetail": "Digital Assignments evidence points to teacher-controlled release and customization; exact student navigation remains less public.",
+                              "assessmentMode": "manual",
+                              "assessmentLabel": "Manual assessment",
+                              "assessmentShort": "passback",
+                              "assessmentPosition": 24,
+                              "assessmentDetail": "Course, module, and lesson assessments are documented; integrations confirm Assignment Sync and Grade Passback for core programs on supported platforms.",
+                              "overrideMode": "partial",
+                              "overrideLabel": "Partial evidence",
+                              "overrideDetail": "Integration and assessment objects are clear; detailed scoring and override behavior is less public.",
+                              "passbackMode": "confirmed",
+                              "passbackLabel": "Passback confirmed",
+                              "evidenceGap": "Strong interoperability evidence; medium confidence for detailed Reveal- or Everyday-specific scoring controls."
+                    },
+                    "q2": {
+                              "wholeCourse": true,
+                              "unitModule": "~",
+                              "lesson": true,
+                              "skillPractice": "~",
+                              "autoSequence": false,
+                              "scheduleLock": "~",
+                              "selfNav": "Student navigation is not clearly public; workflow likely runs through platform or LMS assignment surfaces."
+                    },
+                    "q3": {
+                              "embedded": "~",
+                              "separate": true,
+                              "autoCalc": "?",
+                              "override": "~",
+                              "passback": true,
+                              "retakes": "?",
+                              "assessAssign": "Reveal training references course-, module-, and lesson-level assessments and Digital Assignments.",
+                              "gradingModels": [
+                                        "platform assessment",
+                                        "QTI export",
+                                        "grade passback"
+                              ]
+                    },
+                    "notes": "McGraw Hill has strong interoperability evidence: Assignment Sync, Grade Passback, LTI Advantage, OneRoster, Clever, ClassLink, and major SIS pathways. Reveal training confirms lesson walkthroughs, assessments, reporting, practice, and Digital Assignments, but not all day-to-day scoring rules."
+          },
+          {
+                    "id": "amplify",
+                    "provider": "Amplify",
+                    "product": "Desmos Math",
+                    "model": "Problem-based core + digital supports",
+                    "confidence": "Medium",
+                    "hierarchy": "Problem-based lessons, digital student activity screens, practice, personalized learning, and assessment/reporting suite",
+                    "terms": [
+                              "Problem-based lesson",
+                              "Activity Screen",
+                              "Responsive Feedback",
+                              "Practice",
+                              "Personalized Learning",
+                              "mCLASS"
+                    ],
+                    "defaults": {
+                              "lessonMode": "hybrid",
+                              "lessonLabel": "Hybrid/unclear",
+                              "lessonShort": "digital resources",
+                              "lessonPosition": 50,
+                              "lessonDetail": "Public pages confirm digital lessons, practice, activity screens, collaboration tools, and personalized learning, but not exact assignment defaults.",
+                              "assessmentMode": "unknown",
+                              "assessmentLabel": "Not specified",
+                              "assessmentShort": "suite confirmed",
+                              "assessmentPosition": 48,
+                              "assessmentDetail": "Assessment/reporting and mCLASS are confirmed, but object assignment, scoring, retakes, and Desmos-specific passback are unclear.",
+                              "overrideMode": "partial",
+                              "overrideLabel": "Partial evidence",
+                              "overrideDetail": "Teacher dashboard and facilitation tools are public; exact object-level controls are not.",
+                              "passbackMode": "partial",
+                              "passbackLabel": "Applicable products",
+                              "evidenceGap": "Amplify integration language is product-dependent; Desmos Math object eligibility is not fully verified publicly."
+                    },
+                    "q2": {
+                              "wholeCourse": "~",
+                              "unitModule": "~",
+                              "lesson": true,
+                              "skillPractice": true,
+                              "autoSequence": "~",
+                              "scheduleLock": "~",
+                              "selfNav": "Students use digital resources, practice, activity screens, and collaboration tools; exact assigned queue behavior is not public."
+                    },
+                    "q3": {
+                              "embedded": "~",
+                              "separate": "~",
+                              "autoCalc": "?",
+                              "override": "?",
+                              "passback": "~",
+                              "retakes": "?",
+                              "assessAssign": "Assessment and reporting suite is public, but exact assessment object assignment is not detailed.",
+                              "gradingModels": [
+                                        "unknown public detail",
+                                        "applicable-product grade sync"
+                              ]
+                    },
+                    "notes": "Amplify Desmos Math includes problem-based lessons, digital lesson resources, practice, Interactive Student Activity Screens, Responsive Feedback, collaboration tools, Personalized Learning, a Teacher Dashboard, and assessment/reporting. Grade sync exists for applicable Amplify products, but Desmos Math object-level behavior needs verification."
+          },
+          {
+                    "id": "greatminds",
+                    "provider": "Great Minds",
+                    "product": "Eureka Math2",
+                    "model": "Core curriculum + digital platform",
+                    "confidence": "Medium",
+                    "hierarchy": "Module > topic > lesson; Exit Tickets, Topic Tickets, Pre-Module, formative, and summative assessments",
+                    "terms": [
+                              "Module",
+                              "Topic",
+                              "Lesson",
+                              "Exit Ticket",
+                              "Topic Ticket",
+                              "Pre-Module assessment",
+                              "Portfolio"
+                    ],
+                    "defaults": {
+                              "lessonMode": "manual",
+                              "lessonLabel": "Manual release",
+                              "lessonShort": "to-do list",
+                              "lessonPosition": 32,
+                              "lessonDetail": "The digital platform distributes assignments; students see assigned lesson and practice work in to-do lists.",
+                              "assessmentMode": "manual",
+                              "assessmentLabel": "Assigned assessment",
+                              "assessmentShort": "score details unclear",
+                              "assessmentPosition": 34,
+                              "assessmentDetail": "Teachers can assign and score assessments, and students can launch assigned assessments; auto-scoring, retakes, and passback are not public.",
+                              "overrideMode": "partial",
+                              "overrideLabel": "Partial evidence",
+                              "overrideDetail": "Assignment and scoring are confirmed, but granular controls are not specified publicly.",
+                              "passbackMode": "unknown",
+                              "passbackLabel": "Passback unknown",
+                              "evidenceGap": "High confidence on curriculum hierarchy; medium confidence on digital workflow details."
+                    },
+                    "q2": {
+                              "wholeCourse": "~",
+                              "unitModule": "~",
+                              "lesson": true,
+                              "skillPractice": true,
+                              "autoSequence": "~",
+                              "scheduleLock": "~",
+                              "selfNav": "Students see assigned lesson/practice to-do lists, launch assigned assessments, and review portfolio comments/scores."
+                    },
+                    "q3": {
+                              "embedded": true,
+                              "separate": true,
+                              "autoCalc": "?",
+                              "override": "~",
+                              "passback": "?",
+                              "retakes": "?",
+                              "assessAssign": "Teachers assign and score assessments digitally; scoring automation is not specified.",
+                              "gradingModels": [
+                                        "teacher-scored digital assessment",
+                                        "reports"
+                              ]
+                    },
+                    "notes": "Eureka Math2 has a clear curriculum hierarchy and named assessment objects. The digital platform supports assignments, assessment scoring, progress monitoring, and reports. Missing public details include assignment granularity, auto-scoring vs manual scoring, retakes, and grade passback."
+          },
+          {
+                    "id": "im",
+                    "provider": "Illustrative Mathematics",
+                    "product": "IM v.360 / certified partners",
+                    "model": "Problem-based core through partner platforms",
+                    "confidence": "Medium",
+                    "hierarchy": "TK-12 problem-based curriculum with consistent lesson structure and 6-12 Checkpoints; platform workflow depends on partner",
+                    "terms": [
+                              "Problem-based lesson",
+                              "Checkpoint",
+                              "Assessment",
+                              "AccessIM",
+                              "Imagine IM",
+                              "Kiddom"
+                    ],
+                    "defaults": {
+                              "lessonMode": "unknown",
+                              "lessonLabel": "Partner-dependent",
+                              "lessonShort": "implementation",
+                              "lessonPosition": 48,
+                              "lessonDetail": "The curriculum structure is clear, but assignment workflow depends on the distribution or certified partner platform.",
+                              "assessmentMode": "unknown",
+                              "assessmentLabel": "Partner-dependent",
+                              "assessmentShort": "implementation",
+                              "assessmentPosition": 48,
+                              "assessmentDetail": "Assessments and Checkpoints exist; digital scoring and passback depend on the partner platform.",
+                              "overrideMode": "unknown",
+                              "overrideLabel": "Unknown override",
+                              "overrideDetail": "AccessIM is curriculum access; operational controls must be evaluated by named partner.",
+                              "passbackMode": "unknown",
+                              "passbackLabel": "Passback unknown",
+                              "evidenceGap": "Do not assign one uniform workflow to IM unless the partner platform is named."
+                    },
+                    "q2": {
+                              "wholeCourse": "~",
+                              "unitModule": "~",
+                              "lesson": "~",
+                              "skillPractice": "~",
+                              "autoSequence": "~",
+                              "scheduleLock": "?",
+                              "selfNav": "Student experience depends on partner platform rather than a single IM-wide assignment shell."
+                    },
+                    "q3": {
+                              "embedded": "~",
+                              "separate": true,
+                              "autoCalc": "~",
+                              "override": "~",
+                              "passback": "?",
+                              "retakes": "?",
+                              "assessAssign": "Assessments and Checkpoints exist; digital workflow is partner-dependent.",
+                              "gradingModels": [
+                                        "partner-dependent"
+                              ]
+                    },
+                    "notes": "IM v.360 is a TK-12 problem-based curriculum available through AccessIM and certified partners. Imagine IM and Kiddom add digital tools, assessments, customization, data, and platform workflows. The consolidated report avoids treating IM as one uniform assignment or grading product."
+          },
+          {
+                    "id": "stemscopes",
+                    "provider": "STEMscopes",
+                    "product": "STEMscopes Math",
+                    "model": "Digitally structured blended core",
+                    "confidence": "High",
+                    "hierarchy": "Scope as main unit; sections include Standards, Home, Engage, Explore, Explain, Elaborate, Evaluate, Intervention, and Acceleration",
+                    "terms": [
+                              "Scope",
+                              "5E+IA",
+                              "Engage",
+                              "Explore",
+                              "Evaluate",
+                              "Exit Ticket",
+                              "Assessment Builder"
+                    ],
+                    "defaults": {
+                              "lessonMode": "manual",
+                              "lessonLabel": "Teacher-orchestrated",
+                              "lessonShort": "scope sections",
+                              "lessonPosition": 28,
+                              "lessonDetail": "Teachers orchestrate scope sections and activities; LMS deep linking supports assigning specific STEMscopes content.",
+                              "assessmentMode": "hybrid",
+                              "assessmentLabel": "Embedded + builder",
+                              "assessmentShort": "passback",
+                              "assessmentPosition": 42,
+                              "assessmentDetail": "Preassessments, Exit Tickets, Evaluate prompts, and custom assessments coexist; graded STEMscopes activity can pass to the district gradebook via LMS.",
+                              "overrideMode": "strong",
+                              "overrideLabel": "Strong controls",
+                              "overrideDetail": "Assessment Builder, scope sections, deep links, and grade passback support explicit teacher-managed workflow.",
+                              "passbackMode": "confirmed",
+                              "passbackLabel": "Passback confirmed",
+                              "evidenceGap": "One of the clearest public blended-core workflows for structure, assessment types, and grade passback."
+                    },
+                    "q2": {
+                              "wholeCourse": "~",
+                              "unitModule": true,
+                              "lesson": true,
+                              "skillPractice": true,
+                              "autoSequence": false,
+                              "scheduleLock": "~",
+                              "selfNav": "Students work through assigned scope components; scope structure is more visible than a pure queue."
+                    },
+                    "q3": {
+                              "embedded": true,
+                              "separate": true,
+                              "autoCalc": "~",
+                              "override": true,
+                              "passback": true,
+                              "retakes": "?",
+                              "assessAssign": "Scope-embedded checks plus Assessment Builder/custom assessments are documented.",
+                              "gradingModels": [
+                                        "multiple-choice",
+                                        "open-ended reasoning",
+                                        "custom assessment",
+                                        "LMS passback"
+                              ]
+                    },
+                    "notes": "STEMscopes Math is a strong example of blended core curriculum with explicit scope structure. Engage includes preassessment, Explore includes Exit Tickets and independent practice, and Evaluate includes multiple-choice and open-ended prompts. STEMscopes states that any graded activity taken in STEMscopes transfers to the district gradebook via LMS."
+          },
+          {
+                    "id": "mathnation",
+                    "provider": "Math Nation",
+                    "product": "Math Nation / On-Ramp",
+                    "model": "IM-based core + broad student support",
+                    "confidence": "Medium",
+                    "hierarchy": "K-12 problem-based lessons, Study Expert videos, practice, built-in assessments, dashboards, and On-Ramp adaptive pathways",
+                    "terms": [
+                              "Problem-based lesson",
+                              "Study Expert video",
+                              "Practice",
+                              "Built-in assessment",
+                              "On-Ramp",
+                              "Diagnostic"
+                    ],
+                    "defaults": {
+                              "lessonMode": "hybrid",
+                              "lessonLabel": "Core + adaptive path",
+                              "lessonShort": "support access",
+                              "lessonPosition": 64,
+                              "lessonDetail": "Students have broad access to videos, tools, practice, and On-Ramp pathways while teachers can intervene or assign targeted lessons.",
+                              "assessmentMode": "hybrid",
+                              "assessmentLabel": "Built-in checks",
+                              "assessmentShort": "passback unverified",
+                              "assessmentPosition": 60,
+                              "assessmentDetail": "Built-in assessments, Test Yourself, Check Your Understanding, dashboards, and immediate feedback are confirmed; external passback is not verified.",
+                              "overrideMode": "partial",
+                              "overrideLabel": "Partial controls",
+                              "overrideDetail": "Teachers can intervene, assign targeted lessons, and customize pathways in On-Ramp; the full assignment shell is less public.",
+                              "passbackMode": "unknown",
+                              "passbackLabel": "Passback unknown",
+                              "evidenceGap": "Good evidence for student support and On-Ramp pathways; less evidence for gradebook/passback workflow."
+                    },
+                    "q2": {
+                              "wholeCourse": "~",
+                              "unitModule": "~",
+                              "lesson": true,
+                              "skillPractice": true,
+                              "autoSequence": "~",
+                              "scheduleLock": "~",
+                              "selfNav": "Students can access videos and tools, revisit lessons, and follow personalized On-Ramp support."
+                    },
+                    "q3": {
+                              "embedded": true,
+                              "separate": true,
+                              "autoCalc": true,
+                              "override": "~",
+                              "passback": "?",
+                              "retakes": "?",
+                              "assessAssign": "Built-in assessments, Test Yourself, Check Your Understanding, and On-Ramp diagnostics are confirmed.",
+                              "gradingModels": [
+                                        "immediate feedback",
+                                        "dashboard evidence",
+                                        "teacher intervention"
+                              ]
+                    },
+                    "notes": "Math Nation is less assignment-shell-like than Savvas and less strictly sequence-gated than Zearn. The strongest design signal is broad student access to support plus teacher dashboards and intervention paths. Built-in assessments are clear; external grade passback was not verified."
+          },
+          {
+                    "id": "origo",
+                    "provider": "ORIGO",
+                    "product": "Stepping Stones",
+                    "model": "K-6 core with operational assignment flow",
+                    "confidence": "High",
+                    "hierarchy": "Modules > lessons > lesson resources; each module includes an Assessment folder with formative, summative, and quarterly tests",
+                    "terms": [
+                              "Module",
+                              "Lesson",
+                              "Assessment folder",
+                              "Digital journal",
+                              "Class Resources",
+                              "Assignments",
+                              "Grade Book"
+                    ],
+                    "defaults": {
+                              "lessonMode": "manual",
+                              "lessonLabel": "Manual assignment",
+                              "lessonShort": "selected content",
+                              "lessonPosition": 18,
+                              "lessonDetail": "Teachers choose a classroom, select content, add instructions, set required start and stop times, and assign to all students or individuals.",
+                              "assessmentMode": "manual",
+                              "assessmentLabel": "Assigned assessment",
+                              "assessmentShort": "internal gradebook",
+                              "assessmentPosition": 26,
+                              "assessmentDetail": "Digital program assessments are assigned like daily assignments; many responses receive immediate feedback while teachers score or adjust others.",
+                              "overrideMode": "strong",
+                              "overrideLabel": "Strong controls",
+                              "overrideDetail": "Operational docs show individual assignment, required timing, immediate feedback, teacher scoring, score adjustment, and report export.",
+                              "passbackMode": "partial",
+                              "passbackLabel": "Internal gradebook",
+                              "evidenceGap": "Very strong public workflow evidence for ORIGO Access; external LMS passback was not verified."
+                    },
+                    "q2": {
+                              "wholeCourse": false,
+                              "unitModule": true,
+                              "lesson": true,
+                              "skillPractice": true,
+                              "autoSequence": false,
+                              "scheduleLock": true,
+                              "selfNav": "Student dashboard includes Class Resources, Assignments, and Grade Book."
+                    },
+                    "q3": {
+                              "embedded": true,
+                              "separate": true,
+                              "autoCalc": "~",
+                              "override": true,
+                              "passback": "~",
+                              "retakes": "?",
+                              "assessAssign": "Digital program assessments are assigned through the same workflow as daily assignments from each module Assessment folder.",
+                              "gradingModels": [
+                                        "immediate feedback",
+                                        "teacher-scored",
+                                        "score adjustment",
+                                        "report export"
+                              ]
+                    },
+                    "notes": "ORIGO Access has unusually operational public support. Teachers assign selected content to classes or individual students with start and stop times. Students use Class Resources, Assignments, and Grade Book. Assessments live in module Assessment folders, with immediate feedback for many responses and teacher scoring or adjustment for others."
+          },
+          {
+                    "id": "cpm",
+                    "provider": "CPM",
+                    "product": "Core Connections / Inspiring Connections",
+                    "model": "6-12 blended core with curriculum tools",
+                    "confidence": "Medium",
+                    "hierarchy": "Course/eBook structure with eWorkspace, assessment bank, eTools, homework help, and LMS integrations",
+                    "terms": [
+                              "Course",
+                              "eBook",
+                              "eWorkspace",
+                              "Assessment bank",
+                              "eTools",
+                              "Homework help"
+                    ],
+                    "defaults": {
+                              "lessonMode": "manual",
+                              "lessonLabel": "Teacher-led course",
+                              "lessonShort": "tools + LMS",
+                              "lessonPosition": 34,
+                              "lessonDetail": "Online curriculum, eWorkspace submissions, assessment bank, SSO, rostering, and LMS integrations are confirmed; release controls are not fully public.",
+                              "assessmentMode": "manual",
+                              "assessmentLabel": "Assessment bank",
+                              "assessmentShort": "passback unverified",
+                              "assessmentPosition": 38,
+                              "assessmentDetail": "Premade and custom formative and summative assessments are documented; item scoring and external gradebook details are not public.",
+                              "overrideMode": "partial",
+                              "overrideLabel": "Partial evidence",
+                              "overrideDetail": "Custom assessments and teacher feedback are evident; exact due-date, locking, and passback behavior is not.",
+                              "passbackMode": "unknown",
+                              "passbackLabel": "Passback unknown",
+                              "evidenceGap": "Strong enough to classify as blended core with assessment infrastructure; not enough for exact assignment controls."
+                    },
+                    "q2": {
+                              "wholeCourse": true,
+                              "unitModule": "~",
+                              "lesson": "~",
+                              "skillPractice": true,
+                              "autoSequence": false,
+                              "scheduleLock": "~",
+                              "selfNav": "Students work in eBooks/eWorkspace and submit work for individualized feedback."
+                    },
+                    "q3": {
+                              "embedded": "~",
+                              "separate": true,
+                              "autoCalc": "?",
+                              "override": "~",
+                              "passback": "?",
+                              "retakes": "?",
+                              "assessAssign": "Assessment bank supports premade or custom formative and summative assessments.",
+                              "gradingModels": [
+                                        "premade assessment",
+                                        "custom assessment",
+                                        "teacher feedback"
+                              ]
+                    },
+                    "notes": "CPM provides online Core Connections curriculum/eBooks, eWorkspace submissions and feedback, an assessment bank for pre-made or custom formative and summative assessments, eTools, homework help, automated rostering, SSO, and LMS integrations. Exact assignment release and grade passback behavior remains less public."
+          },
+          {
+                    "id": "bridges",
+                    "provider": "The Math Learning Center",
+                    "product": "Bridges in Mathematics",
+                    "model": "Teacher-led core + assessment partners",
+                    "confidence": "Medium",
+                    "hierarchy": "Grade-level Bridges curriculum plus Educator Site; digital assessments are delivered through approved collaborators such as Otus, Magma, and Forefront",
+                    "terms": [
+                              "Grade-level curriculum",
+                              "Educator Site",
+                              "Digital assessment",
+                              "Otus",
+                              "Magma",
+                              "Forefront",
+                              "Standards data"
+                    ],
+                    "defaults": {
+                              "lessonMode": "manual",
+                              "lessonLabel": "Teacher-led core",
+                              "lessonShort": "partner layer",
+                              "lessonPosition": 30,
+                              "lessonDetail": "Core instruction remains teacher-led; digital assessment workflow depends on the contracted partner platform.",
+                              "assessmentMode": "unknown",
+                              "assessmentLabel": "Partner assessment",
+                              "assessmentShort": "Otus/Magma/etc.",
+                              "assessmentPosition": 48,
+                              "assessmentDetail": "Digital Bridges assessments can be assigned and graded in partner platforms; standards data and gradebook features are partner-dependent.",
+                              "overrideMode": "partial",
+                              "overrideLabel": "Partner controls",
+                              "overrideDetail": "Otus supports assigning, grading, analyzing, and standards-based gradebook customization; this is not one Bridges-native shell.",
+                              "passbackMode": "partial",
+                              "passbackLabel": "Partner gradebook",
+                              "evidenceGap": "Digital grade-bearing workflow is primarily assessment-partner mediated."
+                    },
+                    "q2": {
+                              "wholeCourse": false,
+                              "unitModule": "~",
+                              "lesson": "~",
+                              "skillPractice": "~",
+                              "autoSequence": false,
+                              "scheduleLock": "?",
+                              "selfNav": "Digital assessment UX depends on Otus, Magma, Forefront, or another partner platform."
+                    },
+                    "q3": {
+                              "embedded": "~",
+                              "separate": true,
+                              "autoCalc": "~",
+                              "override": "~",
+                              "passback": "~",
+                              "retakes": "?",
+                              "assessAssign": "Otus, Magma, and Forefront can manage digital Bridges assessments; Otus supports assign, grade, data, and gradebook customization.",
+                              "gradingModels": [
+                                        "partner-dependent",
+                                        "standards data",
+                                        "standards-based gradebook"
+                              ]
+                    },
+                    "notes": "Bridges is an elementary core curriculum whose public digital workflow is centered on the Educator Site and digital assessment collaborators. Otus explicitly supports students completing Bridges assessments digitally, educator assignment/grading/data access, and gradebook customization aligned to district scales and standards."
+          },
+          {
+                    "id": "bigideas",
+                    "provider": "Big Ideas Math",
+                    "product": "Big Ideas Math",
+                    "model": "Textbook access with limited public workflow evidence",
+                    "confidence": "Low",
+                    "hierarchy": "Grade/course textbook or student-edition access; richer operational hierarchy is not public from login and access pages",
+                    "terms": [
+                              "Grade",
+                              "Course",
+                              "Student edition",
+                              "Access code",
+                              "Class registration"
+                    ],
+                    "defaults": {
+                              "lessonMode": "unknown",
+                              "lessonLabel": "Not verified",
+                              "lessonShort": "access model",
+                              "lessonPosition": 48,
+                              "lessonDetail": "Students can access student editions and use class access codes, but public evidence is too thin to verify assignment granularity.",
+                              "assessmentMode": "unknown",
+                              "assessmentLabel": "Not verified",
+                              "assessmentShort": "workflow unknown",
+                              "assessmentPosition": 48,
+                              "assessmentDetail": "Public pages reviewed do not verify grade-bearing assessment assignment, scoring, retakes, or passback.",
+                              "overrideMode": "unknown",
+                              "overrideLabel": "Unknown override",
+                              "overrideDetail": "Teacher controls require official workflow documentation before comparison.",
+                              "passbackMode": "unknown",
+                              "passbackLabel": "Passback unknown",
+                              "evidenceGap": "Low confidence for assignment and grading workflow; public evidence mainly confirms access and registration."
+                    },
+                    "q2": {
+                              "wholeCourse": "~",
+                              "unitModule": "?",
+                              "lesson": "?",
+                              "skillPractice": "?",
+                              "autoSequence": "?",
+                              "scheduleLock": "?",
+                              "selfNav": "Students can access the student edition by program, grade, or state; the assignment UX is not public."
+                    },
+                    "q3": {
+                              "embedded": "?",
+                              "separate": "?",
+                              "autoCalc": "?",
+                              "override": "?",
+                              "passback": "?",
+                              "retakes": "?",
+                              "assessAssign": "Public grade-bearing workflow was not verified.",
+                              "gradingModels": [
+                                        "unknown public detail"
+                              ]
+                    },
+                    "notes": "Big Ideas Math has public student edition access by grade, program, and state plus a login/access-code model. Cengage help confirms class access codes support student registration or adding students to a class. Public evidence is too thin for assignment granularity, score handling, or passback claims."
+          }
+]
+        },
+
+        applyFilters() {
+          const q = this.searchTerm.trim().toLowerCase()
+          let list = [...this.allProviders]
+
+          if (this.modeFilter !== 'all') {
+            list = list.filter((p) => p.defaults.lessonMode === this.modeFilter)
+          }
+
+          if (q) {
+            list = list.filter((p) => [
+              p.provider,
+              p.product,
+              p.model,
+              p.hierarchy,
+              p.defaults.lessonLabel,
+              p.defaults.assessmentLabel,
+              p.defaults.evidenceGap,
+              p.notes,
+              p.terms.join(' ')
+            ].join(' ').toLowerCase().includes(q))
+          }
+
+          this.filteredProviders = list
+        },
+
+        setModeFilter(mode) {
+          this.modeFilter = mode
+          this.applyFilters()
+        },
+
+        resetAll() {
+          this.modeFilter = 'all'
+          this.searchTerm = ''
+          this.selectedProviders = ['savvas', 'zearn', 'mcgraw']
+          this.detailProvider = null
+          this.showCompare = false
+          this.applyFilters()
+        },
+
+        toggleProvider(id) {
+          if (this.selectedProviders.includes(id)) {
+            this.selectedProviders = this.selectedProviders.filter((pid) => pid !== id)
+          } else {
+            this.selectedProviders.push(id)
+          }
+        },
+
+        countByLessonMode(mode) {
+          return this.allProviders.filter((p) => p.defaults.lessonMode === mode).length
+        },
+
+        getProvider(id) {
+          return this.allProviders.find((p) => p.id === id) || this.allProviders[0]
+        },
+
+        showProviderDetail(id) {
+          this.detailProvider = this.getProvider(id)
+          this.$nextTick(() => {
+            if (window.lucide) lucide.createIcons()
+          })
+        },
+
+        closeDetail() {
+          this.detailProvider = null
+        },
+
+        openCompare() {
+          if (!this.selectedProviders.length) {
+            this.selectedProviders = this.filteredProviders.slice(0, 3).map((p) => p.id)
+          }
+          this.showCompare = true
+          this.$nextTick(() => {
+            if (window.lucide) lucide.createIcons()
+          })
+        },
+
+        positionStyle(value) {
+          return `left: calc(${value}% - 7px)`
+        },
+
+        modeClass(mode) {
+          return {
+            auto: 'tag-auto',
+            embedded: 'tag-auto',
+            manual: 'tag-manual',
+            hybrid: 'tag-hybrid',
+            unknown: 'tag-unknown'
+          }[mode] || 'tag-unknown'
+        },
+
+        dotClass(mode) {
+          return {
+            auto: 'dot-auto',
+            embedded: 'dot-auto',
+            manual: 'dot-manual',
+            hybrid: 'dot-hybrid',
+            unknown: 'dot-unknown'
+          }[mode] || 'dot-unknown'
+        },
+
+        overrideClass(mode) {
+          return {
+            strong: 'tag-strong',
+            placement: 'tag-placement',
+            partial: 'tag-partial',
+            unknown: 'tag-unknown'
+          }[mode] || 'tag-unknown'
+        },
+
+        passbackClass(mode) {
+          return {
+            confirmed: 'tag-confirmed',
+            partial: 'tag-passback',
+            none: 'tag-none',
+            unknown: 'tag-unknown'
+          }[mode] || 'tag-unknown'
+        },
+
+        confidenceClass(value) {
+          return {
+            High: 'tag-high',
+            Medium: 'tag-medium',
+            Low: 'tag-partial'
+          }[value] || 'tag-unknown'
+        },
+
+        supportText(value) {
+          if (value === true) return 'Yes'
+          if (value === false) return 'No'
+          if (value === '~') return 'Partial'
+          return 'Unknown'
+        },
+
+        supportClass(value) {
+          if (value === true) return 'tag-auto'
+          if (value === false) return 'tag-no'
+          if (value === '~') return 'tag-partial'
+          return 'tag-unknown'
+        }
+      }
+    }
+
+    window.addEventListener('load', () => {
+      if (window.lucide) lucide.createIcons()
+    })
+  </script>
+</body>
+</html>
